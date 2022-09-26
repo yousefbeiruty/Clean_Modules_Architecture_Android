@@ -1,7 +1,9 @@
 package com.pioneers.cleanmodulesarchitecture.view.main
 
 
-import android.os.Bundle
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,8 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,10 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -38,32 +41,49 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pioneers.cleanmodulesarchitecture.R
 import com.pioneers.cleanmodulesarchitecture.utils.AssetParamType
+import com.pioneers.cleanmodulesarchitecture.view.NavGraphs
+import com.pioneers.cleanmodulesarchitecture.view.appCurrentDestinationAsState
+import com.pioneers.cleanmodulesarchitecture.view.destinations.*
+
+
 import com.pioneers.cleanmodulesarchitecture.view.details.DetailsScreen
 import com.pioneers.cleanmodulesarchitecture.view.main.viewmodel.MainViewModel
+import com.pioneers.cleanmodulesarchitecture.view.startAppDestination
 import com.pioneers.domain.model.Coin
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import com.ramcosta.composedestinations.navigation.navigateTo
+import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 
+private const val TAG = "MainScreen"
+sealed class BottomNavItem(
+    val direction: DirectionDestinationSpec,
+    var title: String, var icon: Int, var screen_route: String) {
 
-sealed class BottomNavItem(var title: String, var icon: Int, var screen_route: String) {
-
-    object Home : BottomNavItem("Home", R.drawable.ic_home, "home")
-    object MyNetwork : BottomNavItem("My Network", R.drawable.ic_networt, "my_network")
-    object AddPost : BottomNavItem("Post", R.drawable.ic_post, "add_post")
-    object Notification : BottomNavItem("Notification", R.drawable.ic_notification, "notification")
-    object Jobs : BottomNavItem("Jobs", R.drawable.ic_job, "jobs")
+    object Home : BottomNavItem(HomeScreenDestination,"Home", R.drawable.ic_home, "home")
+    object MyNetwork : BottomNavItem(NetworkScreenDestination,"My Network", R.drawable.ic_networt, "my_network")
+    object AddPost : BottomNavItem(AddPostScreenDestination,"Post", R.drawable.ic_post, "add_post")
+    object Notification : BottomNavItem(NotificationScreenDestination,"Notification", R.drawable.ic_notification, "notification")
+    object Jobs : BottomNavItem(JobScreenDestination,"Jobs", R.drawable.ic_job, "jobs")
 }
 
-sealed class RoutOfScreens(var title: String,var screen_route: String){
+sealed class RoutOfScreens(var title: String, var screen_route: String) {
     object Details : RoutOfScreens("Details", "details")
 }
-
+@RootNavGraph(start = true)
+@Destination
 @Composable
-fun MainScreenView(viewModel: MainViewModel) {
+fun MainScreenView(viewModel: MainViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomNavigation(navController = navController) }
     ) {
+       DestinationsNavHost(navController = navController,navGraph = NavGraphs.root)
 
-        NavigationGraph(navController = navController,viewModel)
+//        BottomNavigation(navController = navController)
     }
 }
 
@@ -82,6 +102,9 @@ fun BottomNavigation(navController: NavController) {
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
+        val currentDestination: TypedDestination<*> = navController.appCurrentDestinationAsState().value
+            ?: NavGraphs.root.startAppDestination
+        BottomNavigation {
         items.forEach { item ->
             BottomNavigationItem(
                 icon = { Icon(painterResource(id = item.icon), contentDescription = item.title) },
@@ -94,56 +117,69 @@ fun BottomNavigation(navController: NavController) {
                 selectedContentColor = Color.White,
                 unselectedContentColor = Color.White.copy(0.4f),
                 alwaysShowLabel = true,
-                selected = currentRoute == item.screen_route,
+                selected = currentDestination == item.direction,
                 onClick = {
-                    navController.navigate(item.screen_route) {
-
-                        navController.graph.startDestinationRoute?.let { screen_route ->
-                            popUpTo(screen_route) {
-                                saveState = true
-                            }
-                        }
+//                    navController.navigate(item.screen_route) {
+//                        navController.graph.startDestinationRoute?.let { screen_route ->
+//                            popUpTo(screen_route) {
+//                                saveState = true
+//                            }
+//                        }
+//                        launchSingleTop = true
+//                        restoreState = true
+//                    }
+                    navController.navigateTo(item.direction) {
                         launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
         }
-    }
-}
-
-@Composable
-fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) {
-    NavHost(navController, startDestination = BottomNavItem.Home.screen_route) {
-        composable(BottomNavItem.Home.screen_route) {
-            HomeScreen(viewModel,navController)
-        }
-        composable(BottomNavItem.MyNetwork.screen_route) {
-            NetworkScreen()
-        }
-        composable(BottomNavItem.AddPost.screen_route) {
-            AddPostScreen()
-        }
-        composable(BottomNavItem.Notification.screen_route) {
-            NotificationScreen()
-        }
-        composable(BottomNavItem.Jobs.screen_route) {
-            JobScreen()
-        }
-        composable(
-            "${RoutOfScreens.Details.screen_route}/{coin}",
-            arguments = listOf(navArgument("coin") {
-                type = AssetParamType()
-            })
-        ){
-            DetailsScreen(item =viewModel.selectedItem)
         }
     }
 }
 
+
+
+//@Destination
 @Composable
-fun HomeScreen(viewModel: MainViewModel, navController: NavHostController) {
-   // val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<MainViewModel>()
+fun NavigationGraph(navController: NavController) {
+//    NavHost(
+//        navController as NavHostController,
+//
+//        startDestination = BottomNavItem.Home.screen_route) {
+//        composable(BottomNavItem.Home.screen_route) {
+//            HomeScreen(EmptyDestinationsNavigator)
+//        }
+//        composable(BottomNavItem.MyNetwork.screen_route) {
+//            NetworkScreen(EmptyDestinationsNavigator)
+//        }
+//        composable(BottomNavItem.AddPost.screen_route) {
+//            AddPostScreen(EmptyDestinationsNavigator)
+//        }
+//        composable(BottomNavItem.Notification.screen_route) {
+//            NotificationScreen(EmptyDestinationsNavigator)
+//        }
+//        composable(BottomNavItem.Jobs.screen_route) {
+//            JobScreen(EmptyDestinationsNavigator)
+//        }
+//        composable(
+//            "${RoutOfScreens.Details.screen_route}/{coin}",
+//            arguments = listOf(navArgument("coin") {
+//                type = AssetParamType()
+//            })
+//        ) {
+//           // DetailsScreen(item = viewModel.selectedItem)
+//            DetailsScreen(EmptyDestinationsNavigator)
+//        }
+
+ //   }
+}
+
+@Destination
+@Composable
+fun HomeScreen(navigator: DestinationsNavigator) {
+    val viewModel: MainViewModel = hiltViewModel()
+    // val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<MainViewModel>()
     val state = viewModel.listState.collectAsState()
     val loading = state.value.isLoading
     val error = state.value.error
@@ -158,7 +194,7 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavHostController) {
             DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
         ) {
             Box(
-                contentAlignment= Center,
+                contentAlignment = Center,
                 modifier = Modifier
                     .size(100.dp)
                     .background(Color.White, shape = RoundedCornerShape(8.dp))
@@ -167,14 +203,14 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavHostController) {
             }
         }
     }
-    if(data.isNotEmpty() && error.isEmpty()){
+    if (data.isNotEmpty() && error.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colorResource(id = R.color.white))
                 .wrapContentSize(Alignment.Center)
         ) {
-            showDialog=false
+            showDialog = false
             LazyColumn {
                 items(data) { item ->
 //                    Text(
@@ -185,28 +221,32 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavHostController) {
 //                        textAlign = TextAlign.Center,
 //                        fontSize = 20.sp
 //                    )
-                    CoinItem(item,viewModel::onSelectItem,navController)
+                    CoinItem(item, viewModel::onSelectItem, navigator)
                 }
             }
 
         }
-    }else{
+    } else {
         showDialog = false
         Text(
             text = error,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-          //  modifier = Modifier.align(Alignment.CenterHorizontally),
+            //  modifier = Modifier.align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             fontSize = 20.sp
         )
     }
 
 }
+private fun mToast(context: Context){
+    Toast.makeText(context, "This is a Sample Toast", Toast.LENGTH_LONG).show()
+}
 
 @Composable
-fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navController: NavHostController) {
+fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navigator: DestinationsNavigator) {
     var isExpanded by remember { mutableStateOf(false) }
+    val mContext = LocalContext.current
     Card(
         shape = RoundedCornerShape(8.dp),
         elevation = 2.dp,
@@ -214,12 +254,18 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navController: NavHostC
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
+                Log.d(TAG, "CoinItem: ")
+                navigator.navigate(DetailsScreenDestination(coin))
+                mToast(mContext)
                 navCallBack?.invoke(coin)
+
             }
     ) {
-        Row(modifier = Modifier.animateContentSize().clickable {
+        Row(modifier = Modifier
+            .animateContentSize()
+            .clickable {
 
-        }) {
+            }) {
 //            Image(
 //               // painter = rememberCoilPainter(request = meal.imageUrl),
 //                contentDescription = null,
@@ -262,14 +308,19 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navController: NavHostC
                     )
                     .clickable {
                         isExpanded = !isExpanded
+                        Log.d(TAG, "CoinItem: ")
+                        navigator.navigate(DetailsScreenDestination(coin))
+                        mToast(mContext)
+                        navCallBack?.invoke(coin)
                     }
             )
         }
     }
 }
 
+@Destination
 @Composable
-fun NetworkScreen() {
+fun NetworkScreen(navigator: DestinationsNavigator) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -287,8 +338,9 @@ fun NetworkScreen() {
     }
 }
 
+@Destination
 @Composable
-fun AddPostScreen() {
+fun AddPostScreen(navigator: DestinationsNavigator) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -306,9 +358,9 @@ fun AddPostScreen() {
     }
 }
 
-
+@Destination
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(navigator: DestinationsNavigator) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -326,9 +378,9 @@ fun NotificationScreen() {
     }
 }
 
-
+@Destination
 @Composable
-fun JobScreen() {
+fun JobScreen(navigator: DestinationsNavigator) {
     Column(
         modifier = Modifier
             .fillMaxSize()

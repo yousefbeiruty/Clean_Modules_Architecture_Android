@@ -2,9 +2,22 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
     id 'dagger.hilt.android.plugin'
+    id 'com.google.devtools.ksp' version '1.6.10-1.0.2'
+   // id 'com.google.devtools.ksp' version '1.6.21-1.0.6'
 }
 
+//kotlin {
+//    sourceSets {
+//        debug {
+//            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+//        }
+//        release {
+//            kotlin.srcDir("build/generated/ksp/release/kotlin")
+//        }
+//    }
+//}
 android {
     compileSdk 32
 
@@ -27,23 +40,34 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = '1.8'
+        useIR = true
     }
     buildFeatures {
         viewBinding true
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion '1.1.0-rc02'
+        kotlinCompilerVersion compose_version
     }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        kotlin.sourceSets {
+            getByName(variant.name) {
+                kotlin.srcDir("build/generated/ksp/${variant.name}/kotlin")
+            }
         }
     }
 }
@@ -52,7 +76,7 @@ dependencies {
     implementation project(path: ':domain')
     implementation project(path: ':data')
 
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -76,6 +100,7 @@ dependencies {
     kapt "com.google.dagger:hilt-android-compiler:2.38.1"
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
     kapt "androidx.hilt:hilt-compiler:1.0.0"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -88,5 +113,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
 
+    //Library for improve the navigation between compose
+    def destination_version='1.5.20-beta'
+    implementation "io.github.raamcosta.compose-destinations:core:$destination_version"
+    ksp "io.github.raamcosta.compose-destinations:ksp:$destination_version"
 
 }
