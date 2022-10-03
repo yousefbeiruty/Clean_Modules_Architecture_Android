@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -34,6 +36,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -55,6 +58,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.navigation.navigateTo
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 
@@ -70,13 +74,13 @@ sealed class BottomNavItem(
     object Jobs : BottomNavItem(JobScreenDestination,"Jobs", R.drawable.ic_job, "jobs")
 }
 
-sealed class RoutOfScreens(var title: String, var screen_route: String) {
-    object Details : RoutOfScreens("Details", "details")
-}
+//sealed class RoutOfScreens(var title: String, var screen_route: String) {
+//    object Details : RoutOfScreens("Details", "details")
+//}
 @RootNavGraph(start = true)
 @Destination
 @Composable
-fun MainScreenView(viewModel: MainViewModel = hiltViewModel()) {
+fun MainScreenView() {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomNavigation(navController = navController) }
@@ -85,6 +89,14 @@ fun MainScreenView(viewModel: MainViewModel = hiltViewModel()) {
 
 //        BottomNavigation(navController = navController)
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenViewPreview() {
+
+    MainScreenView()
+
 }
 
 @Composable
@@ -98,27 +110,28 @@ fun BottomNavigation(navController: NavController) {
     )
     androidx.compose.material.BottomNavigation(
         backgroundColor = colorResource(id = R.color.purple_700),
-        contentColor = Color.Black
+        contentColor = Color.White
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         val currentDestination: TypedDestination<*> = navController.appCurrentDestinationAsState().value
             ?: NavGraphs.root.startAppDestination
-        BottomNavigation {
-        items.forEach { item ->
-            BottomNavigationItem(
-                icon = { Icon(painterResource(id = item.icon), contentDescription = item.title) },
-                label = {
-                    Text(
-                        text = item.title,
-                        fontSize = 9.sp
-                    )
-                },
-                selectedContentColor = Color.White,
-                unselectedContentColor = Color.White.copy(0.4f),
-                alwaysShowLabel = true,
-                selected = currentDestination == item.direction,
-                onClick = {
+
+        BottomNavigation{
+            items.forEach { item ->
+                BottomNavigationItem(
+                    icon = { Icon(painterResource(id = item.icon), contentDescription = item.title) },
+                    label = {
+                        Text(
+                            text = item.title,
+                            fontSize = 9.sp
+                        )
+                    },
+                    selectedContentColor = Color.White,
+                    unselectedContentColor = Color.White.copy(0.4f),
+                    alwaysShowLabel = true,
+                    selected = currentDestination == item.direction,
+                    onClick = {
 //                    navController.navigate(item.screen_route) {
 //                        navController.graph.startDestinationRoute?.let { screen_route ->
 //                            popUpTo(screen_route) {
@@ -128,13 +141,15 @@ fun BottomNavigation(navController: NavController) {
 //                        launchSingleTop = true
 //                        restoreState = true
 //                    }
-                    navController.navigateTo(item.direction) {
-                        launchSingleTop = true
+                        navController.navigate(item.direction, fun NavOptionsBuilder.() {
+                            launchSingleTop = true
+                        })
                     }
-                }
-            )
+                )
+
+            }
         }
-        }
+
     }
 }
 
@@ -254,17 +269,17 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navigator: Destinations
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
-                Log.d(TAG, "CoinItem: ")
-                navigator.navigate(DetailsScreenDestination(coin))
-                mToast(mContext)
-                navCallBack?.invoke(coin)
+//                Log.d(TAG, "CoinItem: ")
+//                navigator.navigate(DetailsScreenDestination(coin))
+//                mToast(mContext)
+//                navCallBack?.invoke(coin)
 
             }
     ) {
         Row(modifier = Modifier
             .animateContentSize()
             .clickable {
-
+                navigator.navigate(DetailsScreenDestination(coin))
             }) {
 //            Image(
 //               // painter = rememberCoilPainter(request = meal.imageUrl),
@@ -307,11 +322,11 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navigator: Destinations
                             Alignment.CenterVertically
                     )
                     .clickable {
-                        isExpanded = !isExpanded
-                        Log.d(TAG, "CoinItem: ")
-                        navigator.navigate(DetailsScreenDestination(coin))
-                        mToast(mContext)
-                        navCallBack?.invoke(coin)
+//                        isExpanded = !isExpanded
+//                        Log.d(TAG, "CoinItem: ")
+//                        navigator.navigate(DetailsScreenDestination(coin))
+//                        mToast(mContext)
+//                        navCallBack?.invoke(coin)
                     }
             )
         }

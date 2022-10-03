@@ -39,9 +39,9 @@ class MainScreenActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     DestinationsNavHost(navController = navController,navGraph = NavGraphs.root){
-                        composable(HomeScreenDestination){
-                            HomeScreen(navigator = destinationsNavigator)
-                        }
+//                        composable(HomeScreenDestination){
+//                            HomeScreen(navigator = destinationsNavigator)
+//                        }
                     }
                 //    MainScreenView(viewModel)
                 }
