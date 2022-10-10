@@ -2,8 +2,8 @@ package com.pioneers.cleanmodulesarchitecture.view.main
 
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,11 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,33 +32,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.pioneers.cleanmodulesarchitecture.R
-import com.pioneers.cleanmodulesarchitecture.utils.AssetParamType
 import com.pioneers.cleanmodulesarchitecture.view.NavGraphs
 import com.pioneers.cleanmodulesarchitecture.view.appCurrentDestinationAsState
+
 import com.pioneers.cleanmodulesarchitecture.view.destinations.*
 
 
-import com.pioneers.cleanmodulesarchitecture.view.details.DetailsScreen
 import com.pioneers.cleanmodulesarchitecture.view.main.viewmodel.MainViewModel
 import com.pioneers.cleanmodulesarchitecture.view.startAppDestination
 import com.pioneers.domain.model.Coin
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
-import com.ramcosta.composedestinations.navigation.navigate
-import com.ramcosta.composedestinations.navigation.navigateTo
+import com.ramcosta.composedestinations.navigation.*
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
+import com.ramcosta.composedestinations.spec.Route
+import com.ramcosta.composedestinations.utils.isRouteOnBackStack
+
 
 private const val TAG = "MainScreen"
 sealed class BottomNavItem(
@@ -77,26 +71,99 @@ sealed class BottomNavItem(
 //sealed class RoutOfScreens(var title: String, var screen_route: String) {
 //    object Details : RoutOfScreens("Details", "details")
 //}
-@RootNavGraph(start = true)
-@Destination
-@Composable
-fun MainScreenView() {
-    val navController = rememberNavController()
-    Scaffold(
-        bottomBar = { BottomNavigation(navController = navController) }
-    ) {
-       DestinationsNavHost(navController = navController,navGraph = NavGraphs.root)
+private val TypedDestination<DetailsScreenDestination.NavArgs>.shouldShowScaffoldElements get() = this !is DetailsScreenDestination
 
-//        BottomNavigation(navController = navController)
+
+@OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
+@Composable
+fun MainApp() {
+//    val navController = rememberNavController()
+//    Scaffold(
+//        bottomBar = { BottomNavigation(navController = navController) }
+//    ) {
+//       DestinationsNavHost(navController = navController,navGraph = NavGraphs.root)
+//
+////        BottomNavigation(navController = navController)
+//    }
+
+ //   val engine = rememberAnimatedNavHostEngine()
+    val navController = rememberNavController()
+//
+//    val vm = activityViewModel<MainViewModel>()
+//    // 👇 this avoids a jump in the UI that would happen if we relied only on ShowLoginWhenLoggedOut
+   val startRoute = NavGraphs.root.startRoute
+
+    SampleScaffold(
+        navController = navController,
+        startRoute = startRoute,
+        topBar = { dest, backStackEntry ->
+          //  if (dest.shouldShowScaffoldElements) {
+           //     TopBar(dest, backStackEntry)
+        //    }
+        },
+        bottomBar = {
+     //       if (it.shouldShowScaffoldElements) {
+                if((it  as TypedDestination<DetailsScreenDestination.NavArgs>).shouldShowScaffoldElements)
+                BottomNavigation(navController)
+         //   }
+        }
+    ) {
+
+            DestinationsNavHost(
+                //  engine = engine,
+
+                navController = navController,
+                navGraph = NavGraphs.root,
+                //   modifier = Modifier.padding(it),
+                startRoute = startRoute
+            )
+
+
+        // Has to be called after calling DestinationsNavHost because only
+        // then does NavController have a graph associated that we need for
+        // `appCurrentDestinationAsState` method
+      //  ShowLoginWhenLoggedOut(vm, navController)
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
 fun MainScreenViewPreview() {
 
-    MainScreenView()
+    MainApp()
 
+}
+@OptIn(ExperimentalMaterialNavigationApi::class)
+@Composable
+fun SampleScaffold(
+    startRoute: Route,
+    navController: NavHostController,
+    topBar: @Composable (Destination, NavBackStackEntry?) -> Unit,
+    bottomBar: @Composable (com.pioneers.cleanmodulesarchitecture.view.destinations.Destination) -> Unit,
+    content: @Composable (PaddingValues) -> Unit,
+){
+    val destination = navController.appCurrentDestinationAsState().value
+        ?: startRoute.startAppDestination
+    val navBackStackEntry = navController.currentBackStackEntry
+
+    // 👇 only for debugging, you shouldn't use backQueue API as it is restricted by annotation
+ //   navController.backQueue.print()
+
+    val bottomSheetNavigator = rememberBottomSheetNavigator()
+    navController.navigatorProvider += bottomSheetNavigator
+
+    // 👇 ModalBottomSheetLayout is only needed if some destination is bottom sheet styled
+    com.google.accompanist.navigation.material.ModalBottomSheetLayout(
+        bottomSheetNavigator = bottomSheetNavigator,
+        sheetShape = RoundedCornerShape(16.dp)
+    ) {
+        Scaffold(
+         //   topBar = { topBar(destination, navBackStackEntry) },
+            bottomBar = { bottomBar(destination) },
+            content = content
+        )
+    }
 }
 
 @Composable
@@ -116,9 +183,10 @@ fun BottomNavigation(navController: NavController) {
         val currentRoute = navBackStackEntry?.destination?.route
         val currentDestination: TypedDestination<*> = navController.appCurrentDestinationAsState().value
             ?: NavGraphs.root.startAppDestination
-
         BottomNavigation{
             items.forEach { item ->
+                val isCurrentDestOnBackStack = navController.isRouteOnBackStack(item.direction)
+
                 BottomNavigationItem(
                     icon = { Icon(painterResource(id = item.icon), contentDescription = item.title) },
                     label = {
@@ -130,7 +198,7 @@ fun BottomNavigation(navController: NavController) {
                     selectedContentColor = Color.White,
                     unselectedContentColor = Color.White.copy(0.4f),
                     alwaysShowLabel = true,
-                    selected = currentDestination == item.direction,
+                    selected = isCurrentDestOnBackStack,
                     onClick = {
 //                    navController.navigate(item.screen_route) {
 //                        navController.graph.startDestinationRoute?.let { screen_route ->
@@ -141,9 +209,30 @@ fun BottomNavigation(navController: NavController) {
 //                        launchSingleTop = true
 //                        restoreState = true
 //                    }
-                        navController.navigate(item.direction, fun NavOptionsBuilder.() {
+//                        navController.navigate(item.direction, fun NavOptionsBuilder.() {
+//                            launchSingleTop = true
+//                        })
+                        if (isCurrentDestOnBackStack) {
+                            // When we click again on a bottom bar item and it was already selected
+                            // we want to pop the back stack until the initial destination of this bottom bar item
+                            navController.popBackStack(item.direction, false)
+                            return@BottomNavigationItem
+                        }
+
+                        navController.navigate(item.direction) {
+                            // Pop up to the root of the graph to
+                            // avoid building up a large stack of destinations
+                            // on the back stack as users select items
+                            popUpTo(NavGraphs.root) {
+                                saveState = true
+                            }
+
+                            // Avoid multiple copies of the same destination when
+                            // reselecting the same item
                             launchSingleTop = true
-                        })
+                            // Restore state when reselecting a previously selected item
+                         //   restoreState = true
+                        }
                     }
                 )
 
@@ -189,7 +278,7 @@ fun NavigationGraph(navController: NavController) {
 
  //   }
 }
-
+@RootNavGraph(start = true)
 @Destination
 @Composable
 fun HomeScreen(navigator: DestinationsNavigator) {
@@ -298,7 +387,8 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navigator: Destinations
             ) {
                 Text(
                     text = coin.name,
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(5.dp)
                 )
                 CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                     Text(

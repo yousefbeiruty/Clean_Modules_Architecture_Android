@@ -8,18 +8,17 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
-import com.pioneers.cleanmodulesarchitecture.view.destinations.HomeScreenDestination
-import com.pioneers.cleanmodulesarchitecture.view.main.HomeScreen
-import com.pioneers.cleanmodulesarchitecture.view.main.MainScreenView
+import com.pioneers.cleanmodulesarchitecture.view.main.MainApp
 import com.pioneers.cleanmodulesarchitecture.view.ui.theme.CleanModulesArchitectureTheme
 import com.pioneers.cleanmodulesarchitecture.view.main.viewmodel.MainViewModel
-import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import dagger.hilt.android.AndroidEntryPoint
+
+
 
 @AndroidEntryPoint
 class MainScreenActivity : ComponentActivity() {
@@ -38,10 +37,13 @@ class MainScreenActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val navController = rememberNavController()
-                    DestinationsNavHost(navController = navController,navGraph = NavGraphs.root){
-//                        composable(HomeScreenDestination){
-//                            HomeScreen(navigator = destinationsNavigator)
-//                        }
+//                    DestinationsNavHost(navController = navController,navGraph = NavGraphs.root){
+////                        composable(HomeScreenDestination){
+////                            HomeScreen(navigator = destinationsNavigator)
+////                        }
+//                    }
+                    CompositionLocalProvider() {
+                        MainApp()
                     }
                 //    MainScreenView(viewModel)
                 }
