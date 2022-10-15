@@ -130,9 +130,7 @@ fun MainApp() {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenViewPreview() {
-
     MainApp()
-
 }
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
