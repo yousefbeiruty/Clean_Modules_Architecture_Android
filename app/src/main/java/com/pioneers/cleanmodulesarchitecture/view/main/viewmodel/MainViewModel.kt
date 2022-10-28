@@ -4,9 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.*
-import com.pioneers.cleanmodulesarchitecture.model.CoinListState
+import com.pioneers.cleanmodulesarchitecture.model.ListState
 import com.pioneers.domain.common.Resource
 import com.pioneers.domain.model.Coin
+import com.pioneers.domain.model.EventCoin
 import com.pioneers.domain.use_cases.get_coins.GetCoinUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -18,7 +19,9 @@ class MainViewModel @Inject constructor(private val getCoinUseCase: GetCoinUseCa
 //    private val _state = MutableLiveData<CoinListState>()
 //    val state: LiveData<CoinListState> = _state
 
-    val listState=MutableStateFlow<CoinListState>(CoinListState())
+    val listState=MutableStateFlow(ListState<Coin>())
+
+    val listOfEvents=MutableStateFlow(ListState<EventCoin>())
 
 //    val myFlow: Flow<List<Coin>> = flow {
 //        getCoinUseCase().onEach {
@@ -54,21 +57,41 @@ class MainViewModel @Inject constructor(private val getCoinUseCase: GetCoinUseCa
             when (it) {
                 is Resource.Loading -> {
                 //  _state.value= CoinListState(isLoading = true)
-                    listState.value= CoinListState(isLoading = true)
+                    listState.value= ListState(isLoading = true)
                 }
                 is Resource.Success -> {
-                    listState.value= CoinListState(isLoading = false)
+                    listState.value= ListState(isLoading = false)
                  //   _state.value = CoinListState(coinList = it.data ?: emptyList())
-                    listState.value= CoinListState(coinList = it.data ?: emptyList())
+                    listState.value= ListState(data = it.data ?: emptyList())
                 }
                 is Resource.Error -> {
-                    listState.value= CoinListState(isLoading = false)
+                    listState.value= ListState(isLoading = false)
                 //    _state.value =  CoinListState(error = it.message ?: "unexpected error accord")
-                    listState.value= CoinListState(error = it.message ?: "unexpected error accord")
+                    listState.value= ListState(error = it.message ?: "unexpected error accord")
                 }
 
             }
         }.launchIn(viewModelScope)
     }
 
+     fun getEvents(){
+        getCoinUseCase.getEventCoins().onEach {
+            when(it){
+                is Resource.Loading->{
+                    listOfEvents.value= ListState(isLoading = true)
+                }
+                is Resource.Success->{
+                    listOfEvents.value= ListState(isLoading = false)
+                    listOfEvents.value= ListState(data = it.data?: emptyList())
+                }
+                is Resource.Error->{
+                    listOfEvents.value= ListState(isLoading = false)
+                    listOfEvents.value= ListState(error=it.message ?: "unexpected error accord")
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
 }
+
+

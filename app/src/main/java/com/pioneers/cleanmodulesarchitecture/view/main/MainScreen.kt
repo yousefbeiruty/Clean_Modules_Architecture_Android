@@ -47,6 +47,7 @@ import com.pioneers.cleanmodulesarchitecture.view.destinations.*
 import com.pioneers.cleanmodulesarchitecture.view.main.viewmodel.MainViewModel
 import com.pioneers.cleanmodulesarchitecture.view.startAppDestination
 import com.pioneers.domain.model.Coin
+import com.pioneers.domain.model.EventCoin
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -285,7 +286,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     val state = viewModel.listState.collectAsState()
     val loading = state.value.isLoading
     val error = state.value.error
-    val data = state.value.coinList
+    val data = state.value.data
     var showDialog by remember { mutableStateOf(loading) }
 
 
@@ -306,28 +307,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         }
     }
     if (data.isNotEmpty() && error.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(id = R.color.white))
-                .wrapContentSize(Alignment.Center)
-        ) {
-            showDialog = false
-            LazyColumn {
-                items(data) { item ->
-//                    Text(
-//                        text = item.name,
-//                        fontWeight = FontWeight.Bold,
-//                        color = Color.Black,
-//                        modifier = Modifier.align(Alignment.CenterHorizontally),
-//                        textAlign = TextAlign.Center,
-//                        fontSize = 20.sp
-//                    )
-                    CoinItem(item, viewModel::onSelectItem, navigator)
-                }
-            }
-
-        }
+        ListOfCoin(showDialog, data,navigator= navigator)
     } else {
         showDialog = false
         Text(
@@ -341,6 +321,39 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     }
 
 }
+
+@Composable
+private fun ListOfCoin(
+    showDialog: Boolean,
+    data: List<Coin>,
+    viewModel: MainViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator
+) {
+    var showDialog1 = showDialog
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.white))
+            .wrapContentSize(Center)
+    ) {
+        showDialog1 = false
+        LazyColumn {
+            items(data) { item ->
+//                    Text(
+//                        text = item.name,
+//                        fontWeight = FontWeight.Bold,
+//                        color = Color.Black,
+//                        modifier = Modifier.align(Alignment.CenterHorizontally),
+//                        textAlign = TextAlign.Center,
+//                        fontSize = 20.sp
+//                    )
+                CoinItem(item, viewModel::onSelectItem, navigator)
+            }
+        }
+
+    }
+}
+
 private fun mToast(context: Context){
     Toast.makeText(context, "This is a Sample Toast", Toast.LENGTH_LONG).show()
 }
@@ -490,13 +503,162 @@ fun JobScreen(navigator: DestinationsNavigator) {
             .background(colorResource(id = R.color.white))
             .wrapContentSize(Alignment.Center)
     ) {
-        Text(
-            text = "Jobs Screen",
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp
-        )
+//        Text(
+//            text = "Jobs Screen",
+//            fontWeight = FontWeight.Bold,
+//            color = Color.Black,
+//            modifier = Modifier.align(Alignment.CenterHorizontally),
+//            textAlign = TextAlign.Center,
+//            fontSize = 20.sp
+//        )
+        val viewModel: MainViewModel = hiltViewModel()
+        viewModel.getEvents()
+        // val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<MainViewModel>()
+        val state = viewModel.listOfEvents.collectAsState()
+        val loading = state.value.isLoading
+        val error = state.value.error
+        val data = state.value.data
+        var showDialog by remember { mutableStateOf(loading) }
+
+
+
+        if (showDialog) {
+            Dialog(
+                onDismissRequest = { showDialog = false },
+                DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+            ) {
+                Box(
+                    contentAlignment = Center,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(Color.White, shape = RoundedCornerShape(8.dp))
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+        if (data.isNotEmpty() && error.isEmpty()) {
+            ListOfEvent(showDialog, data,navigator= navigator)
+        } else {
+            showDialog = false
+            Text(
+                text = error,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                //  modifier = Modifier.align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp
+            )
+        }
+
     }
 }
+
+@Composable
+fun EventItem(coin: EventCoin, navigator: DestinationsNavigator) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val mContext = LocalContext.current
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        elevation = 2.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clickable {
+//                Log.d(TAG, "CoinItem: ")
+//                navigator.navigate(DetailsScreenDestination(coin))
+//                mToast(mContext)
+//                navCallBack?.invoke(coin)
+
+            }
+    ) {
+        Row(modifier = Modifier
+            .animateContentSize()
+            .clickable {
+                //navigator.navigate(DetailsScreenDestination(coin))
+            }) {
+//            Image(
+//               // painter = rememberCoilPainter(request = meal.imageUrl),
+//                contentDescription = null,
+//                modifier = Modifier
+//                    .size(88.dp)
+//                    .padding(4.dp)
+//                    .align(Alignment.CenterVertically)
+//            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .fillMaxWidth(0.8f)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = coin.name.toString(),
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(5.dp)
+                )
+                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                    Text(
+                        text = coin.description.toString(),
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.subtitle2,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = if (isExpanded) 10 else 4,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+            }
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = "Expand row icon",
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(
+                        if (isExpanded) Alignment.Bottom
+                        else
+                            Alignment.CenterVertically
+                    )
+                    .clickable {
+//                        isExpanded = !isExpanded
+//                        Log.d(TAG, "CoinItem: ")
+//                        navigator.navigate(DetailsScreenDestination(coin))
+//                        mToast(mContext)
+//                        navCallBack?.invoke(coin)
+                    }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListOfEvent(
+    showDialog: Boolean,
+    data: List<EventCoin>,
+    viewModel: MainViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator
+) {
+    var showDialog1 = showDialog
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.white))
+            .wrapContentSize(Center)
+    ) {
+        showDialog1 = false
+        LazyColumn {
+            items(data) { item ->
+//                    Text(
+//                        text = item.name,
+//                        fontWeight = FontWeight.Bold,
+//                        color = Color.Black,
+//                        modifier = Modifier.align(Alignment.CenterHorizontally),
+//                        textAlign = TextAlign.Center,
+//                        fontSize = 20.sp
+//                    )
+                EventItem(item, navigator)
+            }
+        }
+
+    }
+}
+

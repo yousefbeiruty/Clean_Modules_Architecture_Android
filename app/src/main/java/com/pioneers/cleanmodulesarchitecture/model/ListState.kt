@@ -1,9 +1,7 @@
 package com.pioneers.cleanmodulesarchitecture.model
 
-import com.pioneers.domain.model.Coin
-
-data class CoinListState(
+data class ListState<T>(
     val isLoading: Boolean = false,
-    val coinList: List<Coin> = emptyList(),
+    val data: List<T> = emptyList(),
     val error:String=""
 )

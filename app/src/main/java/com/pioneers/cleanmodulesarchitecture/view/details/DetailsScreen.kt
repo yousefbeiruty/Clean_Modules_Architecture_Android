@@ -1,6 +1,7 @@
 package com.pioneers.cleanmodulesarchitecture.view.details
 
 
+import android.icu.text.CaseMap.Title
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -32,7 +33,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun DetailsScreen(navigator: DestinationsNavigator?, item: Coin?=null) {
 
     Scaffold(topBar = {
-        TopBar(navigator)
+        TopBar(navigator,"Details Screen")
     }, content = {it->
         DetailsBody(item)
     }
@@ -40,7 +41,7 @@ fun DetailsScreen(navigator: DestinationsNavigator?, item: Coin?=null) {
 }
 
 @Composable
-private fun TopBar(navigator: DestinationsNavigator?) {
+private fun TopBar(navigator: DestinationsNavigator?,title: String?="") {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -65,7 +66,7 @@ private fun TopBar(navigator: DestinationsNavigator?) {
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "Details Screen",
+                text = title.toString(),
                 color = if (isSystemInDarkTheme()) MaterialTheme.colors.surface else
                     Color.White,
                 textAlign = TextAlign.Center,
@@ -82,16 +83,19 @@ private fun DetailsBody(item: Coin?) {
         modifier = Modifier.fillMaxSize(),
     ) {
         item?.let { it1 ->
-            Text(
-                text = "Bit Coin= ${it1.name}",
-                fontWeight = FontWeight.Bold,
-                color = if (isSystemInDarkTheme()) {
-                    White
-                } else Color.Black,
-                //    modifier = Modifier.align(Alignment.Center),
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp
-            )
+            Column {
+            //    Image
+                Text(
+                    text = "Bit Coin= ${it1.name}",
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSystemInDarkTheme()) {
+                        White
+                    } else Color.Black,
+                    //    modifier = Modifier.align(Alignment.Center),
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp
+                )
+            }
         }
     }
 }
