@@ -25,6 +25,19 @@ import com.pioneers.cleanmodulesarchitecture.view.ui.theme.White
 import com.pioneers.domain.model.Coin
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.pioneers.cleanmodulesarchitecture.R
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Destination
@@ -82,17 +95,42 @@ private fun DetailsBody(item: Coin?) {
         modifier = Modifier.fillMaxSize(),
     ) {
         item?.let { it1 ->
-            Text(
-                text = "Bit Coin= ${it1.name}",
-                fontWeight = FontWeight.Bold,
-                color = if (isSystemInDarkTheme()) {
-                    White
-                } else Color.Black,
-                //    modifier = Modifier.align(Alignment.Center),
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp
-            )
+            Column {
+                Text(
+                    text = "Bit Coin= ${it1.name}",
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSystemInDarkTheme()) {
+                        White
+                    } else Color.Black,
+                    //    modifier = Modifier.align(Alignment.Center),
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ShowImage("")
+            }
         }
+    }
+}
+@Composable
+fun ShowImage(url: String) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .padding(top = 50.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).
+            data("https://media.licdn.com/dms/image/C5603AQHRkCNTh0NZaQ/profile-displayphoto-shrink_800_800/0/1562505491030?e=2147483647&v=beta&t=CqF8mF3OWTWOP3zeiYyIyyRxmPMQBNHPoSxztoI7HsE")
+                .crossfade(true)
+                .placeholder(R.drawable.ic_launcher_background).build(),
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+        )
     }
 }
 
