@@ -29,10 +29,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.min
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -96,18 +98,37 @@ private fun DetailsBody(item: Coin?) {
     ) {
         item?.let { it1 ->
             Column {
-                Text(
-                    text = "Bit Coin= ${it1.name}",
-                    fontWeight = FontWeight.Bold,
-                    color = if (isSystemInDarkTheme()) {
-                        White
-                    } else Color.Black,
-                    //    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ShowImage("")
+                Card(
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Box(modifier = Modifier.widthIn(min = 300.dp).
+                    heightIn(max=200.dp).padding(16.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 10.dp),
+                        ) {
+                            ShowImage("")
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 50.dp)
+                            ) {
+                                Text(
+                                    text = it1.name,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSystemInDarkTheme()) {
+                                        White
+                                    } else Color.Black,
+                                    //    modifier = Modifier.align(Alignment.Center),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    style = MaterialTheme.typography.h5
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -115,10 +136,7 @@ private fun DetailsBody(item: Coin?) {
 @Composable
 fun ShowImage(url: String) {
     Column(
-        modifier = Modifier.fillMaxSize()
-            .padding(top = 50.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current).
@@ -128,7 +146,7 @@ fun ShowImage(url: String) {
             contentScale = ContentScale.Crop,
             contentDescription = null,
             modifier = Modifier
-                .size(200.dp)
+                .size(150.dp)
                 .clip(CircleShape)
         )
     }
