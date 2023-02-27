@@ -75,7 +75,7 @@ android {
 }
 
 apollo {
-    packageName.set("com.pioneers.cleanmodulesarchitecture.model.graphql")
+    packageName.set("com.models")
 }
 dependencies {
     implementation project(path: ':domain')
