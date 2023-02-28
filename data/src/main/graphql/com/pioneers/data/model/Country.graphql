@@ -1,8 +1,8 @@
-query Country($country_code:ID!) {
+query Country($country_code: ID!) {
     country(code: $country_code) {
+        code
         name
         capital
-        code
         emoji
         currency
         languages {

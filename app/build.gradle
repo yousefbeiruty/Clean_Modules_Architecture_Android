@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.application'
-    id("com.apollographql.apollo3").version("3.0.0")
+  //  id("com.apollographql.apollo3").version("3.7.3")
     id 'kotlin-android'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
@@ -74,9 +74,10 @@ android {
     }
 }
 
-apollo {
-    packageName.set("com.models")
-}
+//apollo {
+//    schemaFile = file("./src/main/graphql/com/models/schema.json")
+//    packageName.set("com.models")
+//}
 dependencies {
     implementation project(path: ':domain')
     implementation project(path: ':data')
@@ -127,8 +128,8 @@ dependencies {
 
 
     //apollo
-    implementation "com.apollographql.apollo3:apollo-runtime:3.0.0"
-    implementation 'com.apollographql.apollo:apollo-android-support:1.0.0'
+//    implementation "com.apollographql.apollo3:apollo-runtime:3.7.3"
+//    implementation 'com.apollographql.apollo:apollo-android-support:1.0.0'
     // lifecycle
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     //okhttp3

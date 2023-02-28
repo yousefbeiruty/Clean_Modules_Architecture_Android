@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id("com.apollographql.apollo3").version("3.7.3")
 }
 
 android {
@@ -30,13 +31,18 @@ android {
         jvmTarget = '1.8'
     }
 }
-
+apollo {
+    schemaFile = file("./src/main/graphql/com/pioneers/data/model/schema.json")
+    packageName.set("com.pioneers.data.model")
+}
 dependencies {
     implementation project(path: ':domain')
 
     // Retrofit
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-
+    //apollo
+    implementation "com.apollographql.apollo3:apollo-runtime:3.7.3"
+    implementation 'com.apollographql.apollo:apollo-android-support:1.0.0'
     // Dagger - Hilt
     implementation "com.google.dagger:hilt-android:2.40"
     kapt "androidx.hilt:hilt-compiler:1.0.0"
