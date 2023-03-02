@@ -7,13 +7,20 @@ import androidx.lifecycle.*
 import com.pioneers.cleanmodulesarchitecture.model.CoinListState
 import com.pioneers.domain.common.Resource
 import com.pioneers.domain.model.Coin
+import com.pioneers.domain.model.DetailCountry
+import com.pioneers.domain.model.SimpleCountry
+import com.pioneers.domain.use_case_graph.GetCountriesUseCase
+import com.pioneers.domain.use_case_graph.GetCountryUseCase
 import com.pioneers.domain.use_cases.get_coins.GetCoinUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val getCoinUseCase: GetCoinUseCase) : ViewModel() {
+class MainViewModel @Inject constructor(private val getCoinUseCase: GetCoinUseCase,
+private val getCountriesUseCase: GetCountriesUseCase,
+private val  getCountryUseCase: GetCountryUseCase) : ViewModel() {
 
 //    private val _state = MutableLiveData<CoinListState>()
 //    val state: LiveData<CoinListState> = _state
@@ -37,8 +44,43 @@ class MainViewModel @Inject constructor(private val getCoinUseCase: GetCoinUseCa
 //        }.launchIn(viewModelScope)
 //    }
 
+
+    private val _state= MutableStateFlow(CountriesState())
+    val state=_state.asStateFlow()
+    data class CountriesState(
+        val countries:List<SimpleCountry> = emptyList(),
+        val isLoading:Boolean=false,
+        val selectedCountry:DetailCountry?=null
+    )
+
+    fun selectCountry(code:String){
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    selectedCountry = getCountryUseCase.execute(code)
+                )
+            }
+        }
+    }
+
+    fun dismissCountryDialog(){
+        _state.update {
+            it.copy(
+                selectedCountry = null
+            )
+        }
+    }
     init {
         getCoins()
+        viewModelScope.launch {
+            _state.update { it.copy(
+                isLoading = true
+            ) }
+            _state.update { it.copy(
+                countries = getCountriesUseCase.execute(),
+                isLoading = false
+            ) }
+        }
     }
 
     var selectedItem by mutableStateOf(Coin("",false,"",0,""/*Default Arguments*/)) //Store state as mutableStateOf to ensure proper recompostions

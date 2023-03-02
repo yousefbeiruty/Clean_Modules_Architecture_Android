@@ -5,10 +5,12 @@ import com.pioneers.data.model.CountriesQuery
 import com.pioneers.data.model.CountryQuery
 import com.pioneers.domain.model.DetailCountry
 import com.pioneers.domain.model.SimpleCountry
+import com.pioneers.domain.repository.CountryRepoSitory
+import javax.inject.Inject
 
-class ApolloCountryClient(
+class ApolloCountryClient  constructor(
     private val apolloClient: ApolloClient
-) :CountryClient{
+) : CountryRepoSitory {
     override suspend fun getCountries(): List<SimpleCountry> {
         return apolloClient
             .query(CountriesQuery())
