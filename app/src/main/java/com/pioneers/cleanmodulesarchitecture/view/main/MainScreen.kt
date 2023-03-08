@@ -379,7 +379,7 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navigator: Destinations
 //                    .align(Alignment.CenterVertically)
 //            )
 
-            Column(
+            Row(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .fillMaxWidth(0.8f)
@@ -390,35 +390,41 @@ fun CoinItem(coin: Coin, navCallBack: ((Coin) -> Unit)?, navigator: Destinations
                     style = MaterialTheme.typography.h6,
                     modifier = Modifier.padding(5.dp)
                 )
+
                 CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                    Text(
-                        text = coin.rank.toString(),
-                        textAlign = TextAlign.Start,
-                        style = MaterialTheme.typography.subtitle2,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = if (isExpanded) 10 else 4,
-                        modifier = Modifier.align(Alignment.End)
-                    )
+                    Column (
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterVertically)){
+                        Text(
+                            text = coin.rank.toString(),
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.subtitle2,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = if (isExpanded) 10 else 4,
+                            modifier = Modifier.align(Alignment.End)
+                        )
+                    }
                 }
             }
-            Icon(
-                imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                contentDescription = "Expand row icon",
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(
-                        if (isExpanded) Alignment.Bottom
-                        else
-                            Alignment.CenterVertically
-                    )
-                    .clickable {
-//                        isExpanded = !isExpanded
-//                        Log.d(TAG, "CoinItem: ")
-//                        navigator.navigate(DetailsScreenDestination(coin))
-//                        mToast(mContext)
-//                        navCallBack?.invoke(coin)
-                    }
-            )
+//            Icon(
+//                imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+//                contentDescription = "Expand row icon",
+//                modifier = Modifier
+//                    .padding(16.dp)
+//                    .align(
+//                        if (isExpanded) Alignment.Bottom
+//                        else
+//                            Alignment.CenterVertically
+//                    )
+//                    .clickable {
+////                        isExpanded = !isExpanded
+////                        Log.d(TAG, "CoinItem: ")
+////                        navigator.navigate(DetailsScreenDestination(coin))
+////                        mToast(mContext)
+////                        navCallBack?.invoke(coin)
+//                    }
+//            )
         }
     }
 }
