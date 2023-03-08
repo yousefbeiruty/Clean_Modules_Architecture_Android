@@ -47,6 +47,7 @@ import com.pioneers.cleanmodulesarchitecture.view.destinations.*
 import com.pioneers.cleanmodulesarchitecture.view.main.viewmodel.MainViewModel
 import com.pioneers.cleanmodulesarchitecture.view.startAppDestination
 import com.pioneers.domain.model.Coin
+import com.pioneers.domain.model.SimpleCountry
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -489,20 +490,59 @@ fun NotificationScreen(navigator: DestinationsNavigator) {
 
 @Destination
 @Composable
-fun JobScreen(navigator: DestinationsNavigator) {
+fun JobScreen(navigator: DestinationsNavigator,
+              viewModel: MainViewModel= hiltViewModel(),
+        //      onSelectCountry:(code:String)->Unit,
+            //  onDismissDialog:()->Unit
+) {
+    val state by viewModel.state.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.white))
             .wrapContentSize(Alignment.Center)
     ) {
-        Text(
-            text = "Jobs Screen",
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp
-        )
+//        Text(
+//            text = "Jobs Screen",
+//            fontWeight = FontWeight.Bold,
+//            color = Color.Black,
+//            modifier = Modifier.align(Alignment.CenterHorizontally),
+//            textAlign = TextAlign.Center,
+//            fontSize = 20.sp
+//        )
+
+        Box(modifier = Modifier.fillMaxSize()){
+            if(state.isLoading){
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }else{
+                LazyColumn(modifier = Modifier.fillMaxSize()){
+                    items(state.countries){country->
+                        CountryItem(country
+                        ,
+                            Modifier
+                                .fillMaxWidth()
+                            //    .clickable { onSelectCountry(country.code) }
+                                .padding(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+
     }
+}
+
+@Composable
+private fun CountryItem(country:SimpleCountry,modifier: Modifier=Modifier) {
+   Row(modifier =modifier, verticalAlignment = Alignment.CenterVertically ) {
+       Text(text = country.emoji, fontSize = 30.sp)
+       Spacer(modifier = Modifier.width(16.dp))
+       Column(modifier = Modifier.weight(1f)) {
+           Text(text = country.name, fontSize = 24.sp)
+           Spacer(modifier = Modifier.width(16.dp))
+           Text(text = country.capital)
+       }
+   }
 }

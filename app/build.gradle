@@ -1,5 +1,7 @@
 plugins {
     id 'com.android.application'
+  //  id("com.apollographql.apollo3").version("3.7.3")
+    id 'kotlin-android'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
@@ -72,6 +74,10 @@ android {
     }
 }
 
+//apollo {
+//    schemaFile = file("./src/main/graphql/com/models/schema.json")
+//    packageName.set("com.models")
+//}
 dependencies {
     implementation project(path: ':domain')
     implementation project(path: ':data')
@@ -124,4 +130,14 @@ dependencies {
     implementation "com.google.accompanist:accompanist-navigation-material:0.26.5-rc"
 
     implementation "io.coil-kt:coil-compose:2.2.2"
+
+    //apollo
+//    implementation "com.apollographql.apollo3:apollo-runtime:3.7.3"
+//    implementation 'com.apollographql.apollo:apollo-android-support:1.0.0'
+    // lifecycle
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+    //okhttp3
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation "com.squareup.okhttp3:logging-interceptor:4.8.1"
+
 }
