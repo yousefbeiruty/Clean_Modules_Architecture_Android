@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -511,7 +512,7 @@ fun JobScreen(navigator: DestinationsNavigator,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }else{
-                LazyColumn(modifier = Modifier.fillMaxSize()){
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 50.dp)){
                     items(state.countries){country->
                         CountryItem(country
                         ,
@@ -534,9 +535,9 @@ private fun CountryItem(country:SimpleCountry,modifier: Modifier=Modifier) {
        Text(text = country.emoji, fontSize = 30.sp)
        Spacer(modifier = Modifier.width(16.dp))
        Column(modifier = Modifier.weight(1f)) {
-           Text(text = country.name, fontSize = 24.sp)
+           Text(text = country.name, fontSize = 24.sp,color = Color.Black,)
            Spacer(modifier = Modifier.width(16.dp))
-           Text(text = country.capital)
+           Text(text = country.capital, color = Color.Black)
        }
    }
 }
