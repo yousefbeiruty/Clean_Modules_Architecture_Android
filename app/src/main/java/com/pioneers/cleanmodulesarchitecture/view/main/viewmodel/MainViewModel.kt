@@ -3,7 +3,8 @@ package com.pioneers.cleanmodulesarchitecture.view.main.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pioneers.cleanmodulesarchitecture.model.CoinListState
 import com.pioneers.domain.common.Resource
 import com.pioneers.domain.model.Coin
@@ -13,36 +14,23 @@ import com.pioneers.domain.use_case_graph.GetCountriesUseCase
 import com.pioneers.domain.use_case_graph.GetCountryUseCase
 import com.pioneers.domain.use_cases.get_coins.GetCoinUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @HiltViewModel
 class MainViewModel @Inject constructor(private val getCoinUseCase: GetCoinUseCase,
 private val getCountriesUseCase: GetCountriesUseCase,
 private val  getCountryUseCase: GetCountryUseCase) : ViewModel() {
 
-//    private val _state = MutableLiveData<CoinListState>()
-//    val state: LiveData<CoinListState> = _state
 
     val listState=MutableStateFlow<CoinListState>(CoinListState())
 
-//    val myFlow: Flow<List<Coin>> = flow {
-//        getCoinUseCase().onEach {
-//            when (it) {
-//                is Resource.Loading -> {
-//                    _state.value= CoinListState(isLoading = true)
-//                }
-//                is Resource.Success -> {
-//                    it.data?.let { it1 -> emit(it1) }
-//                    _state.value = CoinListState(coinList = it.data ?: emptyList())
-//                }
-//                is Resource.Error -> {
-//                    _state.value =  CoinListState(error = it.message ?: "unexpected error accord")
-//                }
-//            }
-//        }.launchIn(viewModelScope)
-//    }
 
 
     private val _state= MutableStateFlow(CountriesState())
